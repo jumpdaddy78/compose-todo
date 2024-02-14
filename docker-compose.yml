@@ -1,0 +1,38 @@
+version: "3.8"
+volumes:
+  db-vol:
+services:
+  
+  database:
+    image: mysql:latest 
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: "true"
+    restart: unless-stopped
+    volumes:
+      - db-vol:/var/lib/mysql
+      - ./db-setup/db-setup.sql:/docker-entrypoint-initdb.d/db-setup.sql:ro
+    ports:
+      - "3306:3306"
+  
+  
+  
+  backend:
+    build: ./todo-backend
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_USER=todouser
+      - DB_PASSWORD=todo2023
+      - DB_HOST=database
+      - DB_NAME=todoexpress
+      - ENABLE_DEBUG="TRUE"
+      - DB_PORT=3306
+    depends_on:
+      - database
+  
+  frontend:
+    build: ./todo-frontend
+    ports:
+      - "8000:80"
+    depends_on:
+      - backend
